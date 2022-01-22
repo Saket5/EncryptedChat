@@ -1,9 +1,11 @@
 package com.encryptedchat;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -97,6 +99,9 @@ public class LoginActivity extends AppCompatActivity {
         btnGenerateOtp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+              
+                hideKeyboard();
+
                 // below line is for checking weather the user
                 // has entered his mobile number or not.
                 if (TextUtils.isEmpty(etPhoneNumber.getText().toString())) {
@@ -118,6 +123,8 @@ public class LoginActivity extends AppCompatActivity {
         btnVerifyOtp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideKeyboard();
+
                 // validating if the OTP text field is empty or not.
                 if (TextUtils.isEmpty(etOTP.getText().toString())) {
                     // if the OTP text field is empty display
@@ -131,6 +138,19 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    public void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = this.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(this);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
 
     void setUpVerificationLayout() {
         verificationLayout.setVisibility(View.VISIBLE);
