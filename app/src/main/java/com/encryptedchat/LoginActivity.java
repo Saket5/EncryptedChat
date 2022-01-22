@@ -99,7 +99,9 @@ public class LoginActivity extends AppCompatActivity {
         btnGenerateOtp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+              
                 hideKeyboard();
+
                 // below line is for checking weather the user
                 // has entered his mobile number or not.
                 if (TextUtils.isEmpty(etPhoneNumber.getText().toString())) {
@@ -122,6 +124,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 hideKeyboard();
+
                 // validating if the OTP text field is empty or not.
                 if (TextUtils.isEmpty(etOTP.getText().toString())) {
                     // if the OTP text field is empty display
@@ -136,6 +139,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+
     public void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         //Find the currently focused view, so we can grab the correct window token from it.
@@ -146,6 +150,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
 
     void setUpVerificationLayout() {
         verificationLayout.setVisibility(View.VISIBLE);
