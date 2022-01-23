@@ -2,6 +2,7 @@ package com.encryptedchat
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Base64
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -150,7 +151,7 @@ class LoginActivity : AppCompatActivity() {
 					.document(currentUser.uid)
 					.get()
 					.addOnCompleteListener { task ->
-						if (task.isSuccessful and task.result.exists()) {
+						if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
 							gotoMainActivity()
 						} else {
 							binding.cvPhoneNumber.visibility = GONE
@@ -173,7 +174,7 @@ class LoginActivity : AppCompatActivity() {
 									.document(currentUser.uid)
 									.get()
 									.addOnCompleteListener { task ->
-										if (task.isSuccessful and task.result.exists()) {
+										if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
 											gotoMainActivity()
 										} else {
 											binding.cvPhoneNumber.visibility = GONE
@@ -230,6 +231,7 @@ class LoginActivity : AppCompatActivity() {
 			val userData = hashMapOf(
 					Constants.USER_DATA_NAME to name,
 					Constants.USER_DATA_PHONE_NUMBER to selectedPhoneNumber,
+					Constants.USER_DATA_PUBLIC_KEY to SecurityHelper.getPublicKey(this),
 					Constants.USER_DATA_USER_CHAT_ID to userChatId
 			)
 

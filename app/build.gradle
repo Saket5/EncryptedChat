@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.encryptedchat"
-        minSdkVersion 21
+        minSdkVersion 28
         targetSdkVersion 32
         versionCode 1
         versionName "1.0"
@@ -49,6 +49,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'com.google.firebase:firebase-firestore-ktx'
+
+    implementation 'androidx.biometric:biometric:1.2.0-alpha04'
 
     implementation 'com.hbb20:ccp:2.6.0'
 
