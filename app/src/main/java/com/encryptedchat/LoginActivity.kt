@@ -2,7 +2,6 @@ package com.encryptedchat
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Base64
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -38,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
 			binding.tilPhoneNumber.isEnabled = true
 			binding.btnGenerateOtp.isEnabled = true
 
+			binding.skvProgressBar.visibility = GONE
 			binding.cvOtp.visibility = VISIBLE
 
 			this@LoginActivity.verificationId = verificationId
@@ -57,6 +57,7 @@ class LoginActivity : AppCompatActivity() {
 		override fun onVerificationFailed(e: FirebaseException) {
 			binding.tilPhoneNumber.isEnabled = true
 			binding.btnGenerateOtp.isEnabled = true
+			binding.skvProgressBar.visibility = GONE
 		}
 	}
 
@@ -73,6 +74,7 @@ class LoginActivity : AppCompatActivity() {
 		mFirestore = FirebaseFirestore.getInstance()
 
 		checkUserSignedIn()
+		binding.skvProgressBar.visibility = GONE
 
 		binding.etPhoneNumber.doOnTextChanged { phoneNumber, _, _, _ ->
 			if (!phoneNumber.isNullOrEmpty() && phoneNumber.length == 10) {
@@ -89,12 +91,14 @@ class LoginActivity : AppCompatActivity() {
 		}
 
 		binding.btnGenerateOtp.setOnClickListener {
+			binding.skvProgressBar.visibility = VISIBLE
 			hideKeyboard()
 
 			binding.tilPhoneNumber.isEnabled = false
 			binding.btnGenerateOtp.isEnabled = false
 
-			val phoneNumber = binding.ccpNumber.defaultCountryCodeWithPlus + binding.etPhoneNumber.text.toString()
+			val phoneNumber =
+				binding.ccpNumber.defaultCountryCodeWithPlus + binding.etPhoneNumber.text.toString()
 			selectedPhoneNumber = phoneNumber
 
 			sendVerificationCode()
@@ -110,13 +114,12 @@ class LoginActivity : AppCompatActivity() {
 
 		binding.btnVerifyOtp.setOnClickListener {
 			hideKeyboard()
-
+			binding.skvProgressBar.visibility = VISIBLE
 			binding.tilPhoneNumber.isEnabled = false
 			binding.btnGenerateOtp.isEnabled = false
 
 			binding.tilOtp.isEnabled = false
 			binding.btnVerifyOtp.isEnabled = false
-
 			verifyCode(binding.etOtp.text.toString())
 		}
 
@@ -133,7 +136,7 @@ class LoginActivity : AppCompatActivity() {
 
 			binding.tilName.isEnabled = false
 			binding.btnSubmitName.isEnabled = false
-
+			binding.skvProgressBar.visibility = VISIBLE
 			setUserDataInFireStore(binding.etName.text.toString())
 		}
 	}
@@ -157,6 +160,7 @@ class LoginActivity : AppCompatActivity() {
 							binding.cvPhoneNumber.visibility = GONE
 							binding.cvOtp.visibility = GONE
 
+							binding.skvProgressBar.visibility = GONE
 							binding.cvName.visibility = VISIBLE
 
 							selectedPhoneNumber = currentUser.phoneNumber
@@ -179,7 +183,7 @@ class LoginActivity : AppCompatActivity() {
 										} else {
 											binding.cvPhoneNumber.visibility = GONE
 											binding.cvOtp.visibility = GONE
-
+											binding.skvProgressBar.visibility = GONE
 											binding.cvName.visibility = VISIBLE
 
 											selectedPhoneNumber = currentUser.phoneNumber
@@ -188,7 +192,7 @@ class LoginActivity : AppCompatActivity() {
 						} ?: run {
 							binding.cvPhoneNumber.visibility = GONE
 							binding.cvOtp.visibility = GONE
-
+							binding.skvProgressBar.visibility = GONE
 							binding.cvName.visibility = VISIBLE
 						}
 					} else {
@@ -197,11 +201,14 @@ class LoginActivity : AppCompatActivity() {
 
 						binding.tilOtp.isEnabled = true
 						binding.btnVerifyOtp.isEnabled = true
+						binding.skvProgressBar.visibility = GONE
 
-						Toast.makeText(this@LoginActivity,
-						               task.exception?.message,
-						               Toast.LENGTH_LONG)
-								.show()
+						Toast.makeText(
+							this@LoginActivity,
+							task.exception?.message,
+							Toast.LENGTH_LONG
+						)
+							.show()
 					}
 				}
 	}
@@ -217,6 +224,7 @@ class LoginActivity : AppCompatActivity() {
 
 			PhoneAuthProvider.verifyPhoneNumber(options)
 		}
+
 	}
 
 	private fun verifyCode(code: String) {
@@ -229,10 +237,10 @@ class LoginActivity : AppCompatActivity() {
 			val userChatId = UUID.randomUUID().toString()
 
 			val userData = hashMapOf(
-					Constants.USER_DATA_NAME to name,
-					Constants.USER_DATA_PHONE_NUMBER to selectedPhoneNumber,
-					Constants.USER_DATA_PUBLIC_KEY to SecurityHelper.getPublicKey(this),
-					Constants.USER_DATA_USER_CHAT_ID to userChatId
+				Constants.USER_DATA_NAME to name,
+				Constants.USER_DATA_PHONE_NUMBER to selectedPhoneNumber,
+				//Constants.USER_DATA_PUBLIC_KEY to SecurityHelper.getPublicKey(this),
+				Constants.USER_DATA_USER_CHAT_ID to userChatId
 			)
 
 			mFirestore.collection(Constants.FIRE_STORE_USER_DATA)
