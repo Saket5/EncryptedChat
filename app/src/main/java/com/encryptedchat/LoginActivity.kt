@@ -74,7 +74,6 @@ class LoginActivity : AppCompatActivity() {
 		mFirestore = FirebaseFirestore.getInstance()
 
 		checkUserSignedIn()
-		binding.skvProgressBar.visibility = GONE
 
 		binding.etPhoneNumber.doOnTextChanged { phoneNumber, _, _, _ ->
 			if (!phoneNumber.isNullOrEmpty() && phoneNumber.length == 10) {
@@ -154,6 +153,7 @@ class LoginActivity : AppCompatActivity() {
 					.document(currentUser.uid)
 					.get()
 					.addOnCompleteListener { task ->
+						binding.skvProgressBar.visibility = GONE
 						if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
 							gotoMainActivity()
 						} else {
@@ -166,6 +166,8 @@ class LoginActivity : AppCompatActivity() {
 							selectedPhoneNumber = currentUser.phoneNumber
 						}
 					}
+		} ?: run {
+			binding.skvProgressBar.visibility = GONE
 		}
 	}
 
@@ -239,7 +241,7 @@ class LoginActivity : AppCompatActivity() {
 			val userData = hashMapOf(
 				Constants.USER_DATA_NAME to name,
 				Constants.USER_DATA_PHONE_NUMBER to selectedPhoneNumber,
-				//Constants.USER_DATA_PUBLIC_KEY to SecurityHelper.getPublicKey(this),
+				Constants.USER_DATA_PUBLIC_KEY to SecurityHelper.getPublicKey(this),
 				Constants.USER_DATA_USER_CHAT_ID to userChatId
 			)
 

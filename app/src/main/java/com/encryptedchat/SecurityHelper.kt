@@ -32,10 +32,7 @@ object SecurityHelper {
 				load(null)
 			}
 
-			val privateKey: PrivateKey? = keyStore.getKey(alias, null) as PrivateKey?
-			val publicKey: PublicKey? = keyStore.getCertificate(alias)?.publicKey
-
-			return keyStore.containsAlias(alias) && privateKey != null && publicKey != null
+			return keyStore.containsAlias(alias) && getExistingKeyPair() != null
 		} catch (e: Exception) {
 			Log.e(TAG, e.message, e)
 			false
@@ -83,7 +80,7 @@ object SecurityHelper {
 
 	fun decrypt(cipherText: String): String? {
 		return try {
-			val privateKey = getPrivateKeyEntry()?.privateKey
+			val privateKey = getExistingKeyPair()?.private
 
 			cipher.init(Cipher.DECRYPT_MODE, privateKey)
 
@@ -105,8 +102,7 @@ object SecurityHelper {
 		}
 
 		if (checkKeyExists()) {
-			val privateKeyEntry = getPrivateKeyEntry()
-			return KeyPair(privateKeyEntry?.certificate?.publicKey, privateKeyEntry?.privateKey)
+			return getExistingKeyPair()
 		} else {
 			try {
 				val startDate = GregorianCalendar()
@@ -149,22 +145,25 @@ object SecurityHelper {
 		return null
 	}
 
-	private fun getPrivateKeyEntry(): KeyStore.PrivateKeyEntry? {
-		return try {
-			val keystore = KeyStore.getInstance(SecurityConstants.KEYSTORE_PROVIDER_ANDROID_KEYSTORE).apply {
+	private fun getExistingKeyPair(): KeyPair? {
+		try {
+			val keyStore = KeyStore.getInstance(SecurityConstants.KEYSTORE_PROVIDER_ANDROID_KEYSTORE).apply {
 				load(null)
 			}
 
-			val entry = keystore.getEntry(alias, null)
-			if (entry == null || entry !is KeyStore.PrivateKeyEntry) {
-				return null
+			val privateKey: PrivateKey? = keyStore.getKey(alias, null) as PrivateKey?
+			var publicKey: PublicKey? = null
+			if (privateKey != null) {
+				publicKey = keyStore.getCertificate(alias)?.publicKey
 			}
 
-			entry
+			if (publicKey != null && privateKey != null) {
+				return KeyPair(publicKey, privateKey)
+			}
 		} catch (e: Exception) {
 			Log.e(TAG, e.message, e)
-			null
 		}
+		return null
 	}
 
 	private val cipher: Cipher
