@@ -20,4 +20,8 @@ object Constants {
 	const val MESSAGES_MESSAGE = "message"
 	const val MESSAGES_SENDER = "sender"
 	const val MESSAGES_TIME = "time"
+
+	const val USER_DATA_BUNDLE_ITEM = "user_data_bundle_item"
+	const val CHAT_BUNDLE_ITEM = "chat_bundle_item"
+	const val CHAT_ID_BUNDLE_ITEM = "chat_id_bundle_item"
 }

@@ -10,6 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import com.encryptedchat.databinding.ActivityLoginBinding
+import com.encryptedchat.models.firebase.UserChats
+import com.encryptedchat.models.firebase.UserData
 import com.google.android.gms.tasks.Task
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.*
@@ -18,6 +20,7 @@ import com.google.firebase.auth.PhoneAuthProvider.OnVerificationStateChangedCall
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.*
 import java.util.concurrent.TimeUnit
+import com.encryptedchat.models.local.UserData as LocalUserData
 
 class LoginActivity : AppCompatActivity() {
 	private lateinit var binding: ActivityLoginBinding
@@ -30,36 +33,40 @@ class LoginActivity : AppCompatActivity() {
 
 	private var selectedPhoneNumber: String? = null
 
-	private val mCallBack: OnVerificationStateChangedCallbacks = object : OnVerificationStateChangedCallbacks() {
-		override fun onCodeSent(verificationId: String, forceResendingToken: ForceResendingToken) {
-			super.onCodeSent(verificationId, forceResendingToken)
+	private val mCallBack: OnVerificationStateChangedCallbacks =
+		object : OnVerificationStateChangedCallbacks() {
+			override fun onCodeSent(
+				verificationId: String,
+				forceResendingToken: ForceResendingToken
+			) {
+				super.onCodeSent(verificationId, forceResendingToken)
 
-			binding.tilPhoneNumber.isEnabled = true
-			binding.btnGenerateOtp.isEnabled = true
+				binding.tilPhoneNumber.isEnabled = true
+				binding.btnGenerateOtp.isEnabled = true
 
-			binding.skvProgressBar.visibility = GONE
-			binding.cvOtp.visibility = VISIBLE
+				binding.skvProgressBar.visibility = GONE
+				binding.cvOtp.visibility = VISIBLE
 
-			this@LoginActivity.verificationId = verificationId
-		}
+				this@LoginActivity.verificationId = verificationId
+			}
 
-		override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
-			binding.tilPhoneNumber.isEnabled = true
-			binding.btnGenerateOtp.isEnabled = true
+			override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
+				binding.tilPhoneNumber.isEnabled = true
+				binding.btnGenerateOtp.isEnabled = true
 
-			phoneAuthCredential.smsCode?.let {
-				binding.etOtp.setText(it)
+				phoneAuthCredential.smsCode?.let {
+					binding.etOtp.setText(it)
 
-				verifyCode(it)
+					verifyCode(it)
+				}
+			}
+
+			override fun onVerificationFailed(e: FirebaseException) {
+				binding.tilPhoneNumber.isEnabled = true
+				binding.btnGenerateOtp.isEnabled = true
+				binding.skvProgressBar.visibility = GONE
 			}
 		}
-
-		override fun onVerificationFailed(e: FirebaseException) {
-			binding.tilPhoneNumber.isEnabled = true
-			binding.btnGenerateOtp.isEnabled = true
-			binding.skvProgressBar.visibility = GONE
-		}
-	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -150,22 +157,26 @@ class LoginActivity : AppCompatActivity() {
 	private fun checkUserSignedIn() {
 		firebaseAuth.currentUser?.let { currentUser ->
 			mFirestore.collection(Constants.FIRE_STORE_USER_DATA)
-					.document(currentUser.uid)
-					.get()
-					.addOnCompleteListener { task ->
-						binding.skvProgressBar.visibility = GONE
-						if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
-							gotoMainActivity()
-						} else {
-							binding.cvPhoneNumber.visibility = GONE
-							binding.cvOtp.visibility = GONE
+				.document(currentUser.uid)
+				.get()
+				.addOnCompleteListener { task ->
+					binding.skvProgressBar.visibility = GONE
+					if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
 
-							binding.skvProgressBar.visibility = GONE
-							binding.cvName.visibility = VISIBLE
-
-							selectedPhoneNumber = currentUser.phoneNumber
+						val userData = task.result.toObject(UserData::class.java)
+						if (userData != null) {
+							gotoChatActivity(currentUser.uid, userData)
 						}
+					} else {
+						binding.cvPhoneNumber.visibility = GONE
+						binding.cvOtp.visibility = GONE
+
+						binding.skvProgressBar.visibility = GONE
+						binding.cvName.visibility = VISIBLE
+
+						selectedPhoneNumber = currentUser.phoneNumber
 					}
+				}
 		} ?: run {
 			binding.skvProgressBar.visibility = GONE
 		}
@@ -173,60 +184,61 @@ class LoginActivity : AppCompatActivity() {
 
 	private fun signInWithCredential(credential: PhoneAuthCredential) {
 		firebaseAuth.signInWithCredential(credential)
-				.addOnCompleteListener { task: Task<AuthResult?> ->
-					if (task.isSuccessful) {
-						firebaseAuth.currentUser?.also { currentUser ->
-							mFirestore.collection(Constants.FIRE_STORE_USER_DATA)
-									.document(currentUser.uid)
-									.get()
-									.addOnCompleteListener { task ->
-										if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
-											gotoMainActivity()
-										} else {
-											binding.cvPhoneNumber.visibility = GONE
-											binding.cvOtp.visibility = GONE
-											binding.skvProgressBar.visibility = GONE
-											binding.cvName.visibility = VISIBLE
-
-											selectedPhoneNumber = currentUser.phoneNumber
-										}
+			.addOnCompleteListener { task: Task<AuthResult?> ->
+				if (task.isSuccessful) {
+					firebaseAuth.currentUser?.also { currentUser ->
+						mFirestore.collection(Constants.FIRE_STORE_USER_DATA)
+							.document(currentUser.uid)
+							.get()
+							.addOnCompleteListener { task ->
+								if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
+									val userData = task.result.toObject(UserData::class.java)
+									if (userData != null) {
+										gotoChatActivity(currentUser.uid, userData)
 									}
-						} ?: run {
-							binding.cvPhoneNumber.visibility = GONE
-							binding.cvOtp.visibility = GONE
-							binding.skvProgressBar.visibility = GONE
-							binding.cvName.visibility = VISIBLE
-						}
-					} else {
-						binding.tilPhoneNumber.isEnabled = true
-						binding.btnGenerateOtp.isEnabled = true
+								} else {
+									binding.cvPhoneNumber.visibility = GONE
+									binding.cvOtp.visibility = GONE
+									binding.skvProgressBar.visibility = GONE
+									binding.cvName.visibility = VISIBLE
 
-						binding.tilOtp.isEnabled = true
-						binding.btnVerifyOtp.isEnabled = true
+									selectedPhoneNumber = currentUser.phoneNumber
+								}
+							}
+					} ?: run {
+						binding.cvPhoneNumber.visibility = GONE
+						binding.cvOtp.visibility = GONE
 						binding.skvProgressBar.visibility = GONE
-
-						Toast.makeText(
-							this@LoginActivity,
-							task.exception?.message,
-							Toast.LENGTH_LONG
-						)
-							.show()
+						binding.cvName.visibility = VISIBLE
 					}
+				} else {
+					binding.tilPhoneNumber.isEnabled = true
+					binding.btnGenerateOtp.isEnabled = true
+
+					binding.tilOtp.isEnabled = true
+					binding.btnVerifyOtp.isEnabled = true
+					binding.skvProgressBar.visibility = GONE
+
+					Toast.makeText(
+						this@LoginActivity,
+						task.exception?.message,
+						Toast.LENGTH_LONG
+					).show()
 				}
+			}
 	}
 
 	private fun sendVerificationCode() {
 		selectedPhoneNumber?.let {
 			val options = PhoneAuthOptions.newBuilder(firebaseAuth)
-					.setPhoneNumber(it)
-					.setTimeout(60L, TimeUnit.SECONDS)
-					.setActivity(this)
-					.setCallbacks(mCallBack)
-					.build()
+				.setPhoneNumber(it)
+				.setTimeout(60L, TimeUnit.SECONDS)
+				.setActivity(this)
+				.setCallbacks(mCallBack)
+				.build()
 
 			PhoneAuthProvider.verifyPhoneNumber(options)
 		}
-
 	}
 
 	private fun verifyCode(code: String) {
@@ -238,51 +250,56 @@ class LoginActivity : AppCompatActivity() {
 		firebaseAuth.currentUser?.let { currentUser ->
 			val userChatId = UUID.randomUUID().toString()
 
-			val userData = hashMapOf(
-				Constants.USER_DATA_NAME to name,
-				Constants.USER_DATA_PHONE_NUMBER to selectedPhoneNumber,
-				Constants.USER_DATA_PUBLIC_KEY to SecurityHelper.getPublicKey(this),
-				Constants.USER_DATA_USER_CHAT_ID to userChatId
-			)
+			val userData =
+				UserData(name, selectedPhoneNumber!!, SecurityHelper.getPublicKey(this), userChatId)
 
 			mFirestore.collection(Constants.FIRE_STORE_USER_DATA)
-					.document(currentUser.uid)
-					.set(userData)
-					.addOnCompleteListener { task ->
-						if (task.isSuccessful) {
-							createUserChatId(userChatId)
-						} else {
-							Toast.makeText(this@LoginActivity,
-							               "Something went wrong. Please try again.",
-							               Toast.LENGTH_SHORT)
-									.show()
-						}
+				.document(currentUser.uid)
+				.set(userData)
+				.addOnCompleteListener { task ->
+					if (task.isSuccessful) {
+						createUserChatId(userChatId, currentUser.uid, userData)
+					} else {
+						Toast.makeText(
+							this@LoginActivity,
+							task.exception?.message ?: "Something went wrong. Please try again.",
+							Toast.LENGTH_SHORT
+						).show()
 					}
+				}
 		}
 	}
 
-	private fun createUserChatId(userChatId: String) {
-		val chatIds = hashMapOf(
-				Constants.USER_CHATS_CHAT_IDS to arrayListOf<String>()
-		)
+	private fun createUserChatId(userChatId: String, currentUserId: String, userData: UserData) {
+		val chatIds = UserChats(arrayListOf())
 
 		mFirestore.collection(Constants.FIRE_STORE_USER_CHATS)
-				.document(userChatId)
-				.set(chatIds)
-				.addOnCompleteListener { task ->
-					if (task.isSuccessful) {
-						gotoMainActivity()
-					} else {
-						Toast.makeText(this@LoginActivity,
-						               "Something went wrong. Please try again.",
-						               Toast.LENGTH_SHORT)
-								.show()
-					}
+			.document(userChatId)
+			.set(chatIds)
+			.addOnCompleteListener { task ->
+				if (task.isSuccessful) {
+					gotoChatActivity(currentUserId, userData)
+				} else {
+					Toast.makeText(
+						this@LoginActivity,
+						task.exception?.message ?: "Something went wrong. Please try again.",
+						Toast.LENGTH_SHORT
+					).show()
 				}
+			}
 	}
 
-	private fun gotoMainActivity() {
-		val intent = Intent(this, MainActivity::class.java)
+	private fun gotoChatActivity(currentUserId: String, userData: UserData) {
+		val localUserData = LocalUserData(
+			currentUserId,
+			userData.name,
+			userData.phone_number,
+			userData.public_key,
+			userData.user_chat_id
+		)
+
+		val intent = Intent(this, ChatActivity::class.java)
+		intent.putExtra(Constants.USER_DATA_BUNDLE_ITEM, localUserData)
 		startActivity(intent)
 		finish()
 	}
