@@ -9,10 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.encryptedchat.models.local.MessageViewType
 import com.encryptedchat.models.local.Messages
 
-class ChatScreenRvAdapter (context : Context, messageList : ArrayList<MessageViewType>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class ChatScreenRvAdapter ( messageList : ArrayList<MessageViewType>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
-    private val context : Context  = context
     var messageList : ArrayList<MessageViewType> = messageList
 
 
