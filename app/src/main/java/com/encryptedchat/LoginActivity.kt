@@ -298,7 +298,7 @@ class LoginActivity : AppCompatActivity() {
 			userData.user_chat_id
 		)
 
-		val intent = Intent(this, ChatActivity::class.java)
+		val intent = Intent(this, ChatDetailActivity::class.java)
 		intent.putExtra(Constants.USER_DATA_BUNDLE_ITEM, localUserData)
 		startActivity(intent)
 		finish()
