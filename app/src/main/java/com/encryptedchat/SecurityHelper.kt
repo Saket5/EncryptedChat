@@ -8,22 +8,28 @@ import android.util.Base64
 import android.util.Log
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.google.firebase.auth.FirebaseAuth
 import java.math.BigInteger
 import java.security.*
-import java.security.spec.MGF1ParameterSpec
 import java.security.spec.RSAKeyGenParameterSpec
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
-import java.util.concurrent.Executors
 import javax.crypto.Cipher
-import javax.crypto.spec.OAEPParameterSpec
-import javax.crypto.spec.PSource
 import javax.security.auth.x500.X500Principal
 
 object SecurityHelper {
 	private const val TAG = "SecurityHelper"
+
+	private val cipher: Cipher = Cipher.getInstance(
+		String.format(
+			"%s/%s/%s",
+			KeyProperties.KEY_ALGORITHM_RSA,
+			KeyProperties.BLOCK_MODE_ECB,
+			KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
+		)
+	)
 
 	private val alias =
 		FirebaseAuth.getInstance().currentUser?.uid ?: SecurityConstants.DEFAULT_KEY_ALIAS
@@ -48,7 +54,7 @@ object SecurityHelper {
 	) {
 		val biometricPrompt = BiometricPrompt(
 			activity,
-			Executors.newSingleThreadExecutor(),
+			ContextCompat.getMainExecutor(activity),
 			callback
 		)
 
@@ -74,15 +80,6 @@ object SecurityHelper {
 					X509EncodedKeySpec(Base64.decode(publicKeyString, Base64.DEFAULT))
 				)
 
-			val cipher = Cipher.getInstance(
-				String.format(
-					"%s/%s/%s",
-					KeyProperties.KEY_ALGORITHM_RSA,
-					KeyProperties.BLOCK_MODE_ECB,
-					KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
-				)
-			)
-
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey)
 
 			Base64.encodeToString(cipher.doFinal(plainText.toByteArray()), Base64.NO_WRAP)
@@ -96,15 +93,6 @@ object SecurityHelper {
 		return try {
 			val privateKey = getExistingKeyPair(context)?.private
 
-			val cipher = Cipher.getInstance(
-				String.format(
-					"%s/%s/%s",
-					KeyProperties.KEY_ALGORITHM_RSA,
-					KeyProperties.BLOCK_MODE_ECB,
-					KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
-				)
-			)
-
 			cipher.init(Cipher.DECRYPT_MODE, privateKey)
 
 			String(cipher.doFinal(Base64.decode(cipherText, Base64.NO_WRAP)))
@@ -114,7 +102,7 @@ object SecurityHelper {
 		}
 	}
 
-	private fun checkDeviceSecure(context: Context): Boolean {
+	fun checkDeviceSecure(context: Context): Boolean {
 		val keyGuardManager = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
 
 		val biometricManager = BiometricManager.from(context)
@@ -206,16 +194,6 @@ object SecurityHelper {
 		}
 		return null
 	}
-
-	private val cipher: Cipher
-		get() = Cipher.getInstance(
-			String.format(
-				"%s/%s/%s",
-				KeyProperties.KEY_ALGORITHM_RSA,
-				KeyProperties.BLOCK_MODE_ECB,
-				KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
-			)
-		)
 
 	interface SecurityConstants {
 		companion object {

@@ -76,6 +76,11 @@ class LoginActivity : AppCompatActivity() {
 
 		setContentView(view)
 
+		if (!SecurityHelper.checkDeviceSecure(this)) {
+			Toast.makeText(this, "DEVICE IS NOT SECURE. SOME FUNCTIONS MAY NOT WORK.", Toast.LENGTH_LONG).show()
+			Toast.makeText(this, "PLEASE ADD A FINGERPRINT TO SECURE DEVICE.", Toast.LENGTH_LONG).show()
+		}
+
 		firebaseAuth = FirebaseAuth.getInstance()
 
 		mFirestore = FirebaseFirestore.getInstance()

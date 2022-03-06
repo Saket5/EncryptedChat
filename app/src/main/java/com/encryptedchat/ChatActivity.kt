@@ -1,6 +1,8 @@
 package com.encryptedchat
 
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -40,6 +42,15 @@ class ChatActivity : AppCompatActivity() {
 		setContentView(view)
 
 		currentUserData = intent.extras?.getParcelable(Constants.USER_DATA_BUNDLE_ITEM)
+		currentUserData?.let {
+			binding.tvUserId.text = it.userId
+		}
+
+		binding.ibCopyBtn.setOnClickListener {
+			val clipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+			clipboardManager.setPrimaryClip(ClipData.newPlainText("User ID", binding.tvUserId.text))
+			Toast.makeText(this, "Copied USER ID to clipboard", Toast.LENGTH_LONG).show()
+		}
 
 		val toolbar = binding.toolbar
 		setSupportActionBar(toolbar)
@@ -160,7 +171,7 @@ class ChatActivity : AppCompatActivity() {
 										} else {
 											Toast.makeText(
 												this,
-												task.exception?.message
+												task2.exception?.message
 													?: "Something went wrong. Please try again.",
 												Toast.LENGTH_LONG
 											).show()
@@ -185,7 +196,7 @@ class ChatActivity : AppCompatActivity() {
 										} else {
 											Toast.makeText(
 												this,
-												task.exception?.message
+												task2.exception?.message
 													?: "Something went wrong. Please try again.",
 												Toast.LENGTH_LONG
 											).show()
@@ -237,7 +248,8 @@ class ChatActivity : AppCompatActivity() {
 	private fun createChatWithUser(otherUser: UserData) {
 		currentUserData?.let { currentUser -> // Check current user exists
 			val chatId = UUID.randomUUID().toString()
-			val firebaseChat = FirebaseChats(-1, arrayListOf(), currentUser.userId, otherUser.userId)
+			val firebaseChat =
+				FirebaseChats(-1, arrayListOf(), currentUser.userId, otherUser.userId)
 			FirebaseDatabase.getInstance()
 				.getReference(Constants.REALTIME_DB_CHATS) // Create new chat in DB
 				.child(chatId)
@@ -284,7 +296,7 @@ class ChatActivity : AppCompatActivity() {
 															} else {
 																Toast.makeText(
 																	this@ChatActivity,
-																	task.exception?.message
+																	task4.exception?.message
 																		?: "Something went wrong. Please try again.",
 																	Toast.LENGTH_SHORT
 																).show()
@@ -294,7 +306,7 @@ class ChatActivity : AppCompatActivity() {
 											} else {
 												Toast.makeText(
 													this@ChatActivity,
-													task.exception?.message
+													task3.exception?.message
 														?: "Something went wrong. Please try again.",
 													Toast.LENGTH_SHORT
 												).show()
@@ -303,7 +315,7 @@ class ChatActivity : AppCompatActivity() {
 								} else {
 									Toast.makeText(
 										this@ChatActivity,
-										task.exception?.message
+										task2.exception?.message
 											?: "Something went wrong. Please try again.",
 										Toast.LENGTH_SHORT
 									).show()
