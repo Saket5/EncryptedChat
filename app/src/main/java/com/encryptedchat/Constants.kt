@@ -23,10 +23,7 @@ object Constants {
 
 	const val USER_DATA_BUNDLE_ITEM = "user_data_bundle_item"
 	const val CHAT_BUNDLE_ITEM = "chat_bundle_item"
-	const val CHAT_ID_BUNDLE_ITEM = "chat_id_bundle_item"
-
 
 	const val SENDER_VIEW_TYPE = 0
-
-	const val RECIEVER_VIEW_TYPE = 1
+	const val RECEIVER_VIEW_TYPE = 1
 }

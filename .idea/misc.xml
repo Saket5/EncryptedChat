@@ -7,11 +7,16 @@
         <entry key="app/src/main/res/drawable/rounded_corners_with_stroke.xml" value="0.41302083333333334" />
         <entry key="app/src/main/res/drawable/rounded_edit_box_with_stroke.xml" value="0.187" />
         <entry key="app/src/main/res/layout/activity_chat.xml" value="0.17864583333333334" />
-        <entry key="app/src/main/res/layout/activity_chat_detail.xml" value="0.17864583333333334" />
+        <entry key="app/src/main/res/layout/activity_chat.xml" value="0.32608695652173914" />
+        <entry key="app/src/main/res/layout/activity_chat_detail.xml" value="0.36717279037044104" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.3254715892815775" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.19300911854103345" />
-        <entry key="app/src/main/res/layout/reciever_view.xml" value="0.17864583333333334" />
-        <entry key="app/src/main/res/layout/sender_view.xml" value="0.17864583333333334" />
+        <entry key="app/src/main/res/layout/dialog_add_chat.xml" value="0.32608695652173914" />
+        <entry key="app/src/main/res/layout/item_chat.xml" value="0.32608695652173914" />
+        <entry key="app/src/main/res/layout/reciever_view.xml" value="0.49700443200897754" />
+        <entry key="app/src/main/res/layout/sender_view.xml" value="0.17982456140350878" />
+        <entry key="app/src/main/res/menu/menu_chat.xml" value="0.33421052631578946" />
+        <entry key="app/src/main/res/menu/menu_home.xml" value="0.33421052631578946" />
       </map>
     </option>
   </component>

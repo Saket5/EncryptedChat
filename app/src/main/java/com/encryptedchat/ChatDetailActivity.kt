@@ -1,20 +1,22 @@
 package com.encryptedchat
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.biometric.BiometricPrompt
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.encryptedchat.databinding.ActivityChatBinding
 import com.encryptedchat.databinding.ActivityChatDetailBinding
+import com.encryptedchat.models.local.Chats
 import com.encryptedchat.models.local.MessageViewType
 import com.encryptedchat.models.local.Messages
-import com.google.android.material.appbar.MaterialToolbar
-
 
 class ChatDetailActivity : AppCompatActivity() {
 
 	private lateinit var binding: ActivityChatDetailBinding
 
-	private lateinit var adapter: ChatScreenRvAdapter
+	private lateinit var adapter: ChatDetailAdapter
+
+	private var chat: Chats? = null
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -27,11 +29,15 @@ class ChatDetailActivity : AppCompatActivity() {
 		val toolbar = binding.toolbar
 		setSupportActionBar(toolbar)
 
-		toolbar.setNavigationOnClickListener{
-			onBackPressed()
+		chat = intent.getParcelableExtra(Constants.CHAT_BUNDLE_ITEM)
+
+		toolbar.apply {
+			setNavigationIconTint(resources.getColor(R.color.white))
+			setNavigationOnClickListener { onBackPressed() }
+			chat?.otherUserName?.let { title = it }
 		}
 
-		//adapter = ChatScreenRvAdapter(context,)
+		adapter = ChatDetailAdapter(arrayListOf())
 
 		binding.rvMessage.layoutManager = LinearLayoutManager(this)
 
@@ -42,20 +48,16 @@ class ChatDetailActivity : AppCompatActivity() {
 			sendMessage()
 		}
 
-
-
+		SecurityHelper.showAuthenticationScreen(
+			this,
+			object : BiometricPrompt.AuthenticationCallback() {
+				override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+					super.onAuthenticationSucceeded(result)
+				}
+			})
 	}
 
 	private fun sendMessage() {
-		TODO("Not yet implemented")
+
 	}
-
-
-//	fun transformViewType(message : Messages): MessageViewType {
-//		var viewType =  Constants.RECIEVER_VIEW_TYPE
-//		if ( message.sender.equals()){
-//			viewType =Constants.SENDER_VIEW_TYPE
-//		}
-//		return MessageViewType (message ,viewType )
-//	}
 }

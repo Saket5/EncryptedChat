@@ -12,4 +12,6 @@
     <string name="logout">Logout</string>
     <string name="enter_the_user_id_of_the_person_you_want_to_contact">Enter the USER ID of the person you want to contact</string>
     <string name="user_id">User Id</string>
+    <string name="send">send</string>
+    <string name="enter_your_message">Enter your message</string>
 </resources>

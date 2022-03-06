@@ -44,9 +44,13 @@ class ChatAdapter(private val chats: ArrayList<Chats>) :
 
 			name.text = chat.otherUserName
 
-			val date = Date(chat.lastMessageTime)
-			val sdf = SimpleDateFormat("dd MMM\nHH:mm", Locale.getDefault())
-			time.text = sdf.format(date)
+			if (chat.lastMessageTime != -1L) {
+				val date = Date(chat.lastMessageTime)
+				val sdf = SimpleDateFormat("dd MMM\nHH:mm", Locale.getDefault())
+				time.text = sdf.format(date)
+			} else {
+				time.text = "No message\nsent yet"
+			}
 		}
 
 		override fun onClick(view: View?) {

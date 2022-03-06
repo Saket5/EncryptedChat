@@ -161,7 +161,7 @@ class LoginActivity : AppCompatActivity() {
 				.get()
 				.addOnCompleteListener { task ->
 					binding.skvProgressBar.visibility = GONE
-					if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
+					if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists(this)) {
 
 						val userData = task.result.toObject(UserData::class.java)
 						if (userData != null) {
@@ -191,7 +191,7 @@ class LoginActivity : AppCompatActivity() {
 							.document(currentUser.uid)
 							.get()
 							.addOnCompleteListener { task ->
-								if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists()) {
+								if (task.isSuccessful and task.result.exists() && SecurityHelper.checkKeyExists(this)) {
 									val userData = task.result.toObject(UserData::class.java)
 									if (userData != null) {
 										gotoChatActivity(currentUser.uid, userData)

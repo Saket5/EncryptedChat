@@ -2,9 +2,9 @@
 <resources>
     <dimen name="message_start_margin">6dp</dimen>
     <dimen name="message_padding">8dp</dimen>
-    <dimen name="message_time_padding">8dp</dimen>
+    <dimen name="message_time_padding">4dp</dimen>
     <dimen name="message_time_start_margin">8dp</dimen>
     <dimen name="message_card_elevation">10dp</dimen>
 
-    <dimen name="message_card_corner_radius">20dp</dimen>
+    <dimen name="message_card_corner_radius">12dp</dimen>
 </resources>
